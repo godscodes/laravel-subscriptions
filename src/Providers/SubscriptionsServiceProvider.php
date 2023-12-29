@@ -71,7 +71,7 @@ class SubscriptionsServiceProvider extends ServiceProvider
             __DIR__.'/../../config/config.php' => config_path('rinvex.subscriptions.php'),
         ], 'rinvex/subscriptions::config');
         $this->publishes([
-            __DIR__.'/../../database/migrations/rinvex/subscriptions/' => database_path('migrations')
+            __DIR__.'/../../database/migrations/' => database_path('migrations/rinvex/laravel-subscriptions')
         ], 'rinvex/subscriptions::migrations');
         if (! $this->app->runningInConsole()) {
             $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
