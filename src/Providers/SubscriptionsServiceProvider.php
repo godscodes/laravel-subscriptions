@@ -23,10 +23,10 @@ class SubscriptionsServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $commands = [
-        MigrateCommand::class => 'command.rinvex.subscriptions.migrate',
-        PublishCommand::class => 'command.rinvex.subscriptions.publish',
-        RollbackCommand::class => 'command.rinvex.subscriptions.rollback',
+    protected $commandss = [
+        'command.rinvex.subscriptions.migrate',
+        'command.rinvex.subscriptions.publish',
+        'command.rinvex.subscriptions.rollback',
     ];
 
     /**
@@ -45,9 +45,18 @@ class SubscriptionsServiceProvider extends ServiceProvider
             'rinvex.subscriptions.plan_subscription' => PlanSubscription::class,
             'rinvex.subscriptions.plan_subscription_usage' => PlanSubscriptionUsage::class,
         ]);
+        $this->app->singleton('command.rinvex.subscriptions.migrate', function ($app) {
+            return new MigrateCommand; // Replace with the actual command class
+        });
+        $this->app->singleton('command.rinvex.subscriptions.publish', function ($app) {
+            return new PublishCommand; // Replace with the actual command class
+        });
+        $this->app->singleton('command.rinvex.subscriptions.rollback', function ($app) {
+            return new RollbackCommand; // Replace with the actual command class
+        });
 
         // Register console commands
-        $this->registerCommands($this->commands);
+        $this->commands($this->commandss);
     }
 
     /**
@@ -58,8 +67,14 @@ class SubscriptionsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Publish Resources
-        $this->publishesConfig('rinvex/laravel-subscriptions');
-        $this->publishesMigrations('rinvex/laravel-subscriptions');
-        ! $this->autoloadMigrations('rinvex/laravel-subscriptions') || $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        $this->publishes([
+            __DIR__.'/../../config/config.php' => config_path('rinvex/subscriptions.php'),
+        ], 'rinvex/subscriptions::config');
+        $this->publishes([
+            __DIR__.'/../../database/migrations/' => database_path('migrations')
+        ], 'rinvex/subscriptions::migrations');
+        if (! $this->app->runningInConsole()) {
+            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        }
     }
 }
